@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Welcome{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <header>
+        <div class="user-profile">
+            <a href="{{ url_for('user_profile') }}">
+                <div class="profile-icon">
+                    <span class="profile-initial">{{ user_name[0] }}</span>
+                </div>
+                <span class="user-name">{{ user_name }}</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="content">
+        {% block content %}
+        <!-- Page-specific content goes here -->
+        {% endblock %}
+    </div>
+
+</body>
+</html>

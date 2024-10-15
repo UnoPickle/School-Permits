@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Home Page{% endblock %}
+
+{% block content %}
+<html>
+    <head>
+        <link rel="stylesheet" href="../static/login.css">
+        <script type="text/javascript" src="../static/login.js"></script>
+        <title>Login - School Permit</title>
+    </head>
+    <body>
+        <div class="search">
+            <div class="search_bar">
+                <input placeholder="Search for a student/class..." class="search_bar_text" id="student-search" onkeyup="searchName()"/>
+                <button class="search_button"></button>
+            </div>
+            <div class="search_results" id="search-results">
+            </div>
+        </div>
+    </body>
+</html>
+{% endblock %}

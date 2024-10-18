@@ -1,14 +1,9 @@
 from dataclasses import dataclass
 @dataclass
-class Student:
+class User:
     first_name: str
     last_name: str
-    def get_full_name(self):
-        return f'{self.first_name} {self.last_name}'
+    type: int
 
-@dataclass
-class Teacher:
-    first_name: str
-    last_name: str
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'

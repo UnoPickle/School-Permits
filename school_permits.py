@@ -44,7 +44,8 @@ def login():
 @check_session
 def find_student():
     return render_template('find_student.html', user_name=session["name"])
-@app.route('/add', methods=['GET', 'POST'])
+
+@app.route('/admin/add', methods=['GET', 'POST'])
 @check_session
 def add_person():
     if request.method == 'POST':

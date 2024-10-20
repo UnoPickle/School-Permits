@@ -9,6 +9,7 @@ USER_TABLE_FIELD_USER_ID = "user_id"
 USER_TABLE_FIELD_EMAIL = "email"
 USER_TABLE_FIELD_PASSWORD = "password"
 USER_TABLE_FIELD_NAME = "name"
+USER_TABLE_FIELD_TYPE = "type"
 
 STUDENT_TABLE = "students"
 STUDENT_TABLE_FIELD_USER_ID = "user_id"
@@ -58,7 +59,8 @@ class DatabaseManager:
                 {USER_TABLE_FIELD_USER_ID} INTEGER PRIMARY KEY,
                 {USER_TABLE_FIELD_EMAIL} TEXT NOT NULL UNIQUE,
                 {USER_TABLE_FIELD_PASSWORD} TEXT NOT NULL,
-                {USER_TABLE_FIELD_NAME} TEXT NOT NULL
+                {USER_TABLE_FIELD_NAME} TEXT NOT NULL,
+                {USER_TABLE_FIELD_TYPE} INTEGER NOT NULL
             )
         """)
 
@@ -137,10 +139,11 @@ class DatabaseManager:
         res = res.fetchall()
         return res
     def add(self,name,type: int, password="123456"):
-        self.cur.execute(f"INSERT OR IGNORE INTO users (name, password, type) VALUES (?, ?, ?)",(name, password, type))
+        self.cur.execute(f"INSERT OR IGNORE INTO {USER_TABLE} ({USER_TABLE_FIELD_NAME}, {USER_TABLE_FIELD_PASSWORD}, type) VALUES (?, ?, ?)",(name, password, type))
         self.con.commit()
+
     def login(self, name, password):
-        res = self.cur.execute("SELECT * FROM users WHERE name = ? AND password = ?", (name, password))
+        res = self.cur.execute(f"SELECT * FROM users WHERE {USER_TABLE_FIELD_NAME} = ? AND {USER_TABLE_FIELD_PASSWORD} = ?", (name, password))
         res = res.fetchall()
         if len(res) > 0:
             return res[0]

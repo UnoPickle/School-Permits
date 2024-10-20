@@ -1,8 +1,13 @@
 import sqlite3
 
-from student import User
+from database_types.student import Student
 
 DATABASE_NAME = "school_permits.db"
+
+
+USER_TYPE_STUDENT = 0
+USER_TYPE_PARENT = 1
+USER_TYPE_TEACHER = 2
 
 USER_TABLE = "users"
 USER_TABLE_FIELD_USER_ID = "user_id"
@@ -132,18 +137,19 @@ class DatabaseManager:
         """)
 
         # Commit the changes
-        self.con.commit()        # Create users table
-
-    def get_students(self):
-        res = self.cur.execute("SELECT name FROM users WHERE type = 0")
-        res = res.fetchall()
-        return res
-    def add(self,name,type: int, password="123456"):
-        self.cur.execute(f"INSERT OR IGNORE INTO {USER_TABLE} ({USER_TABLE_FIELD_NAME}, {USER_TABLE_FIELD_PASSWORD}, type) VALUES (?, ?, ?)",(name, password, type))
         self.con.commit()
 
-    def login(self, name, password):
-        res = self.cur.execute(f"SELECT * FROM users WHERE {USER_TABLE_FIELD_NAME} = ? AND {USER_TABLE_FIELD_PASSWORD} = ?", (name, password))
+    def get_students(self):
+        res = self.cur.execute(f"SELECT * FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_TYPE} = {USER_TYPE_STUDENT}")
+        res = res.fetchall()
+        return [Student.from_db(val) for val in res]
+
+    def add(self,name,type: int, password="123456"):
+        self.cur.execute(f"INSERT OR IGNORE INTO {USER_TABLE} ({USER_TABLE_FIELD_NAME}, {USER_TABLE_FIELD_PASSWORD}, {USER_TABLE_FIELD_TYPE}) VALUES (?, ?, ?)",(name, password, type))
+        self.con.commit()
+
+    def login(self, email, password):
+        res = self.cur.execute(f"SELECT * FROM users WHERE {USER_TABLE_FIELD_EMAIL} = ? AND {USER_TABLE_FIELD_PASSWORD} = ?", (email, password))
         res = res.fetchall()
         if len(res) > 0:
             return res[0]

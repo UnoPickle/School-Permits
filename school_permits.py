@@ -29,12 +29,12 @@ def index():
 
 @app.route("/login", methods=["POST"])
 def login():
-    name = request.form["username"]
+    email = request.form["email"]
     password = request.form["password"]
     try:
-        user = database.login(name, password)
-        session["name"] = name
-        session["type"] = user[2]
+        user = database.login(email, password)
+        session["name"] = user[3]
+        session["type"] = user[4]
         return redirect(url_for("find_student"))
     except Exception as e:
         print(e)

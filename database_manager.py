@@ -6,9 +6,9 @@ import sqlite3
 
 DATABASE_NAME = "school_permits.db"
 
-USER_TYPE_STUDENT = 0
-USER_TYPE_PARENT = 1
-USER_TYPE_TEACHER = 2
+USER_TYPE_STUDENT = 1
+USER_TYPE_PARENT = 2
+USER_TYPE_TEACHER = 0
 
 USER_TABLE = "users"
 USER_TABLE_FIELD_USER_ID = "user_id"
@@ -39,6 +39,7 @@ STUDENTS_GROUPS_FIELD_GROUP_ID = "group_id"
 
 GROUP_TABLE = "groups"
 GROUP_TABLE_FIELD_GROUP_ID = "group_id"
+
 
 class DatabaseManager:
     def __init__(self):
@@ -114,29 +115,59 @@ class DatabaseManager:
                 {USER_TABLE_FIELD_PASSWORD},
                 {USER_TABLE_FIELD_TYPE},
                 {USER_TABLE_FIELD_EMAIL}
-            ) VALUES ('Admin', '12345', {USER_TYPE_STUDENT}, 'admin@example.com')
+            ) VALUES ('Admin', '12345', {USER_TYPE_TEACHER}, 'admin@example.com')
         """)
 
         # Commit the changes
         self.con.commit()
-
 
     def get_students(self):
         res = self.cur.execute(f"SELECT * FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_TYPE} = {USER_TYPE_STUDENT}")
         res = res.fetchall()
         return [Student.from_db(val) for val in res]
 
-    def add(self, name, u_type: int, email: str, password="123456"):
-        self.cur.execute(
-            f"INSERT OR IGNORE INTO {USER_TABLE} ({USER_TABLE_FIELD_NAME}, {USER_TABLE_FIELD_PASSWORD}, {USER_TABLE_FIELD_TYPE}, {USER_TABLE_FIELD_EMAIL}) VALUES (?, ?, ?, ?)",
-            (name, password, u_type, email))
-        if u_type == 1:
-            self.cur.execute(
-                f"INSERT OR IGNORE INTO {STUDENT_TABLE} ({STUDENT_TABLE_FIELD_USER_ID}, {STUDENT_TABLE_FIELD_PERMITS}, {STUDENT_TABLE_FIELD_GROUPS}) VALUES (?, ?, ?)",
-                (self.get_user_id(email), [], []))
+    def add_user(self, name, u_type: int, email: str, password="123456", parents=None):
+        self.cur.execute(f"""
+                        INSERT INTO {USER_TABLE} (
+                            {USER_TABLE_FIELD_EMAIL},
+                            {USER_TABLE_FIELD_PASSWORD},
+                            {USER_TABLE_FIELD_NAME},
+                            {USER_TABLE_FIELD_TYPE}
+                        ) VALUES (?, ?, ?, ?)
+                    """, (email, password, name, u_type))
+
+        # Get the user_id of the newly inserted user
+        user_id = self.cur.lastrowid
+
+        # If the user is a student, insert into the students table
+        if u_type == USER_TYPE_STUDENT:
+            self.cur.execute(f"""
+                            INSERT INTO {STUDENT_TABLE} (
+                                {STUDENT_TABLE_FIELD_USER_ID},
+                                {STUDENT_TABLE_FIELD_PARENT1_ID},
+                                {STUDENT_TABLE_FIELD_PARENT2_ID}
+                            ) VALUES (?, ?, ?)
+                        """, (user_id, *parents))
 
         self.con.commit()
+        return user_id
 
+    def add_parent_to_student(self, parent_id, student_id):
+        user = self.get_student_by_id(student_id)
+        print(student_id)
+        if user:
+            print(user)
+            if not user[1]:
+                self.cur.execute(f"""UPDATE {STUDENT_TABLE} SET {STUDENT_TABLE_FIELD_PARENT1_ID} = {parent_id}""")
+                # Commit the changes
+                self.con.commit()
+                return True
+            elif not user[2]:
+                self.cur.execute(f"""UPDATE {STUDENT_TABLE} SET {STUDENT_TABLE_FIELD_PARENT2_ID} = {parent_id}""")
+                # Commit the changes
+                self.con.commit()
+                return True
+        return False
     def login(self, email, password):
         res = self.cur.execute(
             f"SELECT * FROM users WHERE {USER_TABLE_FIELD_EMAIL} = ? AND {USER_TABLE_FIELD_PASSWORD} = ?",
@@ -147,7 +178,15 @@ class DatabaseManager:
         else:
             raise "Invalid name or password"
 
-    def get_user_id(self, email):
-        res = self.cur.execute(f"SELECT user_id FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_EMAIL} = '{email}'")
+    def get_user_by_id(self, id):
+        res = self.cur.execute(f"SELECT * FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_USER_ID} = {id}")
         res = res.fetchone()
         return res[0]
+    def get_student_by_id(self, id):
+        res = self.cur.execute(f"SELECT * FROM {STUDENT_TABLE} WHERE {STUDENT_TABLE_FIELD_USER_ID} = {id}")
+        res = res.fetchone()
+        return res
+    def get_user_by_email(self, email):
+        res = self.cur.execute(f"SELECT * FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_EMAIL} = '{email}'")
+        res = res.fetchone()
+        return res

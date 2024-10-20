@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 {% extends 'base.html' %}
 
-{% block title %}Home Page{% endblock %}
+{% block title %}Add Person{% endblock %}
 
 {% block content %}
 <html lang="en">
@@ -65,12 +65,41 @@
         button:hover {
             background-color: #556cd6;
         }
+
+        .additional-fields {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .parent-fields,
+        .student-fields {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+
+        .add-parent-button {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #eee;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+
+        .add-parent-button:hover {
+            background-color: #ddd;
+        }
     </style>
 </head>
 <body>
     <div class="content">
         <h1>Add Person</h1>
-        <form action="{{ url_for('add_person') }}" method="POST">
+        <form action="{{ url_for('add_person') }}" method="POST" id="addPersonForm">
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" required>
 
@@ -78,16 +107,124 @@
             <input type="email" id="email" name="email" required>
 
             <label for="role">Select Role:</label>
-            <select id="role" name="role" required>
+            <select id="role" name="role" required onchange="toggleAdditionalFields()">
                 <option value="" disabled selected>Select a role</option>
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
                 <option value="parent">Parent</option>
             </select>
 
+            <!-- Additional Fields for Parent and Student -->
+            <div id="additionalFields" class="additional-fields">
+                <!-- Fields for Parent -->
+                <div id="parentFields" class="parent-fields">
+                    <label for="studentEmail">Student's Email:</label>
+                    <input type="email" id="studentEmail" name="student_email">
+                </div>
+
+                <!-- Fields for Student -->
+                <div id="studentFields" class="student-fields">
+                    <div id="parentProfiles">
+                        <label>Parent Profile:</label>
+                        <input type="text" name="parent_name[]" placeholder="Parent Name" required>
+                        <input type="email" name="parent_email[]" placeholder="Parent Email" required>
+                    </div>
+                    <button type="button" class="add-parent-button" onclick="addParentProfile()">Add Another Parent</button>
+                </div>
+            </div>
+
             <button type="submit">Add Person</button>
         </form>
     </div>
+
+    <script>
+        function toggleAdditionalFields() {
+            const roleSelect = document.getElementById('role');
+            const selectedRole = roleSelect.value;
+            const additionalFields = document.getElementById('additionalFields');
+            const parentFields = document.getElementById('parentFields');
+            const studentFields = document.getElementById('studentFields');
+
+            if (selectedRole === 'parent') {
+                additionalFields.style.display = 'block';
+                parentFields.style.display = 'block';
+                studentFields.style.display = 'none';
+                // Set required attribute for studentEmail
+                document.getElementById('studentEmail').setAttribute('required', 'required');
+                // Remove required attributes from parent profiles
+                setRequiredForParentProfiles(false);
+            } else if (selectedRole === 'student') {
+                additionalFields.style.display = 'block';
+                parentFields.style.display = 'none';
+                studentFields.style.display = 'block';
+                // Remove required attribute from studentEmail
+                document.getElementById('studentEmail').removeAttribute('required');
+                // Set required attributes for parent profiles
+                setRequiredForParentProfiles(true);
+            } else {
+                additionalFields.style.display = 'none';
+                parentFields.style.display = 'none';
+                studentFields.style.display = 'none';
+                // Remove required attributes
+                document.getElementById('studentEmail').removeAttribute('required');
+                setRequiredForParentProfiles(false);
+            }
+        }
+
+        function setRequiredForParentProfiles(required) {
+            const parentNames = document.getElementsByName('parent_name[]');
+            const parentEmails = document.getElementsByName('parent_email[]');
+            for (let i = 0; i < parentNames.length; i++) {
+                if (required) {
+                    parentNames[i].setAttribute('required', 'required');
+                    parentEmails[i].setAttribute('required', 'required');
+                } else {
+                    parentNames[i].removeAttribute('required');
+                    parentEmails[i].removeAttribute('required');
+                }
+            }
+        }
+
+        let parentCount = 1; // Initial parent profile counts as one
+
+        function addParentProfile() {
+            if (parentCount >= 2) {
+                return; // Do not add more than two parents
+            }
+
+            const parentProfilesDiv = document.getElementById('parentProfiles');
+            const newParentDiv = document.createElement('div');
+            newParentDiv.classList.add('parent-profile');
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.name = 'parent_name[]';
+            nameInput.placeholder = 'Parent Name';
+            nameInput.required = true;
+
+            const emailInput = document.createElement('input');
+            emailInput.type = 'email';
+            emailInput.name = 'parent_email[]';
+            emailInput.placeholder = 'Parent Email';
+            emailInput.required = true;
+
+            newParentDiv.appendChild(document.createElement('br'));
+            newParentDiv.appendChild(nameInput);
+            newParentDiv.appendChild(emailInput);
+
+            parentProfilesDiv.appendChild(newParentDiv);
+
+            parentCount++;
+
+            if (parentCount >= 2) {
+                // Disable the add button if two parents have been added
+                const addButton = document.querySelector('.add-parent-button');
+                addButton.disabled = true;
+                addButton.style.backgroundColor = '#ccc';
+                addButton.style.cursor = 'not-allowed';
+            }
+        }
+    </script>
 </body>
 </html>
 {% endblock %}

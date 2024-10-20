@@ -10,6 +10,11 @@ async function searchName() {
 
     let results = [];
 
+
+
+    var a = 5;
+
+
     try {
         const response = await fetch(`http://${requestServer}/${studentNamesUrlGetRequest}?${studentNameGetRequestParam}=${student}`)
         results = await response.json();

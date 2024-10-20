@@ -6,14 +6,13 @@ from functools import wraps
 database = DatabaseManager()
 
 app = Flask(__name__)
-TYPES = {"student": 0, "parent": 1, "teacher": 2}
+TYPES = {"teacher": 0, "student": 1, "parent": 2}
 
 
 def check_session(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         # check session
-        print(session)
         if "name" in session:
             return func(*args, **kwargs)
         # no session, go to log in
@@ -26,10 +25,15 @@ def check_session(func):
 def index():
     return render_template("login.html")
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return render_template("login.html")
+
 
 @app.route("/login", methods=["POST"])
 def login():
-    email = request.form["email"]
+    email = request.form["username"]
     password = request.form["password"]
     try:
         user = database.login(email, password)
@@ -37,7 +41,6 @@ def login():
         session["type"] = user[4]
         return redirect(url_for("find_student"))
     except Exception as e:
-        print(e)
         return redirect("/")
 
 @app.route("/find_student")
@@ -45,14 +48,18 @@ def login():
 def find_student():
     return render_template('find_student.html', user_name=session["name"])
 
-@app.route('/admin/add', methods=['GET', 'POST'])
+@app.route('/add', methods=['GET', 'POST'])
 @check_session
 def add_person():
+    if session["type"] != TYPES["teacher"]:
+        return render_template("permission_error.html")
     if request.method == 'POST':
         name = request.form['name']
         role = request.form['role']
+        print(role)
+        email = request.form['email']
         if role in TYPES:
-            database.add(name, TYPES[role])
+            database.add(name, TYPES[role], email)
 
     return render_template('add_user.html', user_name=session["name"])
 
@@ -63,7 +70,6 @@ def handle_student_names():
     student_name = request.args.get("name")
 
     students = database.get_students()
-    print(students)
     similar_students = [i[0] for i in students if student_name in i[0]]
 
     return json.dumps(similar_students)

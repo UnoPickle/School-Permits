@@ -4,7 +4,6 @@ from database_types.student import Student
 
 DATABASE_NAME = "school_permits.db"
 
-
 USER_TYPE_STUDENT = 0
 USER_TYPE_PARENT = 1
 USER_TYPE_TEACHER = 2
@@ -135,7 +134,7 @@ class DatabaseManager:
                 {GROUP_TABLE_FIELD_GROUP_ID} INTEGER PRIMARY KEY
             )
         """)
-
+        #self.cur.execute(f"INSERT OR IGNORE INTO {USER_TABLE} ({USER_TABLE_FIELD_NAME}, {USER_TABLE_FIELD_PASSWORD}, {USER_TABLE_FIELD_TYPE}, {USER_TABLE_FIELD_EMAIL}) VALUES ('Daniel Roi', 12345, 0, 'danielr@pelech.ort.org.il')")
         # Commit the changes
         self.con.commit()
 
@@ -144,8 +143,8 @@ class DatabaseManager:
         res = res.fetchall()
         return [Student.from_db(val) for val in res]
 
-    def add(self,name,type: int, password="123456"):
-        self.cur.execute(f"INSERT OR IGNORE INTO {USER_TABLE} ({USER_TABLE_FIELD_NAME}, {USER_TABLE_FIELD_PASSWORD}, {USER_TABLE_FIELD_TYPE}) VALUES (?, ?, ?)",(name, password, type))
+    def add(self,name, u_type: int,email: str, password="123456"):
+        self.cur.execute(f"INSERT OR IGNORE INTO {USER_TABLE} ({USER_TABLE_FIELD_NAME}, {USER_TABLE_FIELD_PASSWORD}, {USER_TABLE_FIELD_TYPE}, {USER_TABLE_FIELD_EMAIL}) VALUES (?, ?, ?, ?)",(name, password, u_type, email))
         self.con.commit()
 
     def login(self, email, password):

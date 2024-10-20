@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permit Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            background-color: #e0f0ff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .left-panel, .right-panel {
+            background-color: #4c74e0;
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            width: 300px;
+            margin: 5px;
+        }
+        .right-panel {
+            background-color: #75a8f0;
+        }
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            background-color: #d3d3d3;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        .btn {
+            background-color: #ff8fa6;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #ff6f90;
+        }
+        .permit-valid {
+            background-color: #a5c9ff;
+            color: black;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left panel with student information -->
+        <div class="left-panel">
+            <div class="profile-image"></div>
+            <h2>{{ student_name }}</h2>
+            <p>Class: {{ class_grade }}</p>
+            <h3>Permits</h3>
+            <p>Today</p>
+            <div class="permit-valid">{{ permit_today_time }} - Valid</div>
+            <p>Future Permits</p>
+            <p>{{ future_permit_date }} - {{ future_permit_time }}</p>
+        </div>
+
+        <!-- Right panel with permit details -->
+        <div class="right-panel">
+            <p><strong>Name:</strong> {{ student_name }}</p>
+            <p><strong>Class:</strong> {{ class_grade }}</p>
+            <p><strong>Status:</strong> {{ permit_status }}</p>
+            <p><strong>Date:</strong> {{ permit_date }}</p>
+            <p><strong>Time:</strong> {{ permit_time }}</p>
+            <p><strong>Teacher name:</strong> {{ teacher_name }}</p>
+            <p><strong>Parental Approval:</strong> {{ parental_approval }}</p>
+
+            <!-- Buttons -->
+            <button class="btn">Mark as used</button>
+            <button class="btn">Edit permit</button>
+        </div>
+    </div>
+</body>
+</html>

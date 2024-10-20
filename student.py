@@ -1,7 +1,9 @@
-class Student:
-    def __init__(self, first_name, last_name):
-        self.first_name = first_name
-        self.last_name = last_name
+from dataclasses import dataclass
+@dataclass
+class User:
+    first_name: str
+    last_name: str
+    type: int
 
-    def __str__(self):
+    def get_full_name(self):
         return f'{self.first_name} {self.last_name}'

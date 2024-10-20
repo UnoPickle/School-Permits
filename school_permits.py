@@ -70,7 +70,7 @@ def handle_student_names():
     student_name = request.args.get("name")
 
     students = database.get_students()
-    similar_students = [i[0] for i in students if student_name in i[0]]
+    similar_students = [i.get_name() for i in students if student_name in i.get_name()]
 
     return json.dumps(similar_students)
 

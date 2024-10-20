@@ -4,6 +4,8 @@ from database_types.student import Student
 
 import sqlite3
 
+from database_types.user import User
+
 DATABASE_NAME = "school_permits.db"
 
 USER_TYPE_STUDENT = 0
@@ -19,8 +21,7 @@ USER_TABLE_FIELD_TYPE = "type"
 
 STUDENT_TABLE = "students"
 STUDENT_TABLE_FIELD_USER_ID = "user_id"
-STUDENT_TABLE_FIELD_PARENT1_ID = "parent1_id"
-STUDENT_TABLE_FIELD_PARENT2_ID = "parent2_id"
+STUDENT_TABLE_FIELD_PARENT_ID = "parent_id"
 
 PERMITS_TABLE = "single_use_permits"
 PERMITS_TABLE_FIELD_PERMIT_ID = "permit_id"
@@ -62,11 +63,9 @@ class DatabaseManager:
         self.cur.execute(f"""
             CREATE TABLE IF NOT EXISTS {STUDENT_TABLE} (
                 {STUDENT_TABLE_FIELD_USER_ID} INTEGER PRIMARY KEY,
-                {STUDENT_TABLE_FIELD_PARENT1_ID} INTEGER,
-                {STUDENT_TABLE_FIELD_PARENT2_ID} INTEGER,
+                {STUDENT_TABLE_FIELD_PARENT_ID} INTEGER,
                 FOREIGN KEY ({STUDENT_TABLE_FIELD_USER_ID}) REFERENCES {USER_TABLE}({USER_TABLE_FIELD_USER_ID}) ON DELETE CASCADE,
-                FOREIGN KEY ({STUDENT_TABLE_FIELD_PARENT1_ID}) REFERENCES {USER_TABLE}({USER_TABLE_FIELD_USER_ID}) ON DELETE SET NULL,
-                FOREIGN KEY ({STUDENT_TABLE_FIELD_PARENT2_ID}) REFERENCES {USER_TABLE}({USER_TABLE_FIELD_USER_ID}) ON DELETE SET NULL
+                FOREIGN KEY ({STUDENT_TABLE_FIELD_PARENT_ID}) REFERENCES {USER_TABLE}({USER_TABLE_FIELD_USER_ID}) ON DELETE SET NULL
             )
         """)
 
@@ -124,7 +123,7 @@ class DatabaseManager:
     def get_students(self):
         res = self.cur.execute(f"SELECT * FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_TYPE} = {USER_TYPE_STUDENT}")
         res = res.fetchall()
-        return [Student.from_db(val) for val in res]
+        return [User.from_db(val) for val in res]
 
     def add(self, name, u_type: int, email: str, password="123456"):
         self.cur.execute(
@@ -132,7 +131,7 @@ class DatabaseManager:
             (name, password, u_type, email))
         if u_type == 1:
             self.cur.execute(
-                f"INSERT OR IGNORE INTO {STUDENT_TABLE} ({STUDENT_TABLE_FIELD_USER_ID}, {STUDENT_TABLE_FIELD_PERMITS}, {STUDENT_TABLE_FIELD_GROUPS}) VALUES (?, ?, ?)",
+                f"INSERT OR IGNORE INTO {STUDENT_TABLE} ({STUDENT_TABLE_FIELD_USER_ID}) VALUES (?)",
                 (self.get_user_id(email), [], []))
 
         self.con.commit()

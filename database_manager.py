@@ -4,6 +4,8 @@ from database_types.student import Student
 
 import sqlite3
 
+from database_types.user import User
+
 DATABASE_NAME = "school_permits.db"
 
 USER_TYPE_STUDENT = 1
@@ -124,7 +126,7 @@ class DatabaseManager:
     def get_students(self):
         res = self.cur.execute(f"SELECT * FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_TYPE} = {USER_TYPE_STUDENT}")
         res = res.fetchall()
-        return [Student.from_db(val) for val in res]
+        return [User.from_db(val) for val in res]
 
     def add_user(self, name, u_type: int, email: str, password="123456", parents=None):
         self.cur.execute(f"""

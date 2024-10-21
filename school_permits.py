@@ -23,6 +23,8 @@ def check_session(func):
 
 @app.route("/")
 def index():
+    if "name" in session:
+        return f"HI {session["name"]}"
     return render_template("login.html")
 
 

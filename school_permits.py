@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, redirect, session, url_for, f
 from database_manager import DatabaseManager
 import json
 from functools import wraps
-
+import secrets
+from email_manager import send_change_password
 database = DatabaseManager()
 
 app = Flask(__name__)
@@ -130,6 +131,41 @@ def add_person():
         # Handle GET request by rendering the form
         return render_template('add_user.html', user_name=session["name"])
 
+
+@app.route("/reset_password", methods=["GET", "POST"])
+def reset_password():
+    if request.method == "GET":
+        return render_template("reset_password.html")
+    else:
+        if not ("secret_token" in session and "wanted_email" in session):
+            redirect(url_for("index"))
+        code = request.form.get("code")
+        if not code:
+            return redirect(url_for("forgot_password"))
+        if code == session["secret_token"]:
+            del session["secret_token"]
+            database.change_password_by_email(session["wanted_email"], session["new_password"])
+            del session["wanted_email"]
+            return "Your password has been reseted to the deafult password"
+        else:
+            #didnt succeed
+            return redirect(url_for("forgot_password"))
+
+
+@app.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "GET":
+        return render_template("forgot_password.html")
+    else:
+        email = request.form.get("email")
+        if not email or not database.get_user_by_email(email):
+            print("email does not in database")
+            return render_template("forgot_password.html")
+        token = secrets.token_hex(16)
+        session["secret_token"] = token
+        session["wanted_email"] = email
+        send_change_password(email, token)
+        return redirect(url_for("reset_password"))
 
 @app.route("/student_names")
 @check_session

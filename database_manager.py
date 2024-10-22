@@ -170,6 +170,7 @@ class DatabaseManager:
                 self.con.commit()
                 return True
         return False
+
     def login(self, email, password):
         res = self.cur.execute(
             f"SELECT * FROM users WHERE {USER_TABLE_FIELD_EMAIL} = ? AND {USER_TABLE_FIELD_PASSWORD} = ?",
@@ -184,11 +185,18 @@ class DatabaseManager:
         res = self.cur.execute(f"SELECT * FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_USER_ID} = {id}")
         res = res.fetchone()
         return res[0]
+
     def get_student_by_id(self, id):
         res = self.cur.execute(f"SELECT * FROM {STUDENT_TABLE} WHERE {STUDENT_TABLE_FIELD_USER_ID} = {id}")
         res = res.fetchone()
         return res
+
     def get_user_by_email(self, email):
         res = self.cur.execute(f"SELECT * FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_EMAIL} = '{email}'")
         res = res.fetchone()
         return res
+
+    def change_password_by_email(self, email, new_password="123456"):
+        res = self.cur.execute(
+            f"UPDATE password FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_EMAIL} = '{email}' SET password = '{new_password}'")
+        self.con.commit()

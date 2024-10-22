@@ -1,7 +1,7 @@
 import smtplib
 from email.message import EmailMessage
 EMAIL_ADDRESS = 'pelech.permits@gmail.com'
-EMAIL_PASSWORD = 'MY_CODE'# I dont want the code to be on github
+EMAIL_PASSWORD = 'MY_PASSWORD'# I dont want the code to be on github
 EMAIL_CONTENT = """<!DOCTYPE html>
 <html>
 <head>
@@ -68,8 +68,7 @@ def send_change_password(email: str, code: str):
     msg['Subject'] = 'Forgot your password'
     msg['From'] = EMAIL_ADDRESS
     msg['To'] = email
-    msg.set_content(EMAIL_CONTENT.replace("{content}", code))
-
+    msg.add_alternative(EMAIL_CONTENT.replace("{content}", code), subtype='html')
     # For HTML content, use:
     # msg.add_alternative('<h1>This is an HTML Email</h1>', subtype='html')
 

@@ -198,5 +198,5 @@ class DatabaseManager:
 
     def change_password_by_email(self, email, new_password="123456"):
         res = self.cur.execute(
-            f"UPDATE password FROM {USER_TABLE} WHERE {USER_TABLE_FIELD_EMAIL} = '{email}' SET password = '{new_password}'")
+            f"UPDATE  {USER_TABLE} SET password = '{new_password}' WHERE {USER_TABLE_FIELD_EMAIL} = '{email}' ")
         self.con.commit()

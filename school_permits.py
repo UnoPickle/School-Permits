@@ -139,16 +139,19 @@ def reset_password():
     else:
         if not ("secret_token" in session and "wanted_email" in session):
             redirect(url_for("index"))
-        code = request.form.get("code")
+        code = request.form.get("secret_code")
+        new_password = request.form.get("new_password")
         if not code:
+            print("code does not exists")
             return redirect(url_for("forgot_password"))
         if code == session["secret_token"]:
             del session["secret_token"]
-            database.change_password_by_email(session["wanted_email"], session["new_password"])
+            database.change_password_by_email(session["wanted_email"], new_password)
             del session["wanted_email"]
             return "Your password has been reseted to the deafult password"
         else:
             #didnt succeed
+            print(code, session["secret_token"])
             return redirect(url_for("forgot_password"))
 
 
